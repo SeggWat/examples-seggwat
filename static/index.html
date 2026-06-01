@@ -186,6 +186,7 @@
                             <button onclick="updateFeedbackLanguage('en')" class="btn btn-sm btn-primary">English</button>
                             <button onclick="updateFeedbackLanguage('de')" class="btn btn-sm btn-outline">Deutsch</button>
                             <button onclick="updateFeedbackLanguage('sv')" class="btn btn-sm btn-outline">Svenska</button>
+                            <button onclick="updateFeedbackLanguage('fr')" class="btn btn-sm btn-outline">Français</button>
                         </div>
                     </div>
 
@@ -254,7 +255,7 @@
                             <pre class="px-6 overflow-x-auto"><code id="star-code">&lt;!-- Star rating (default 1-5) --&gt;
 &lt;div id="star-widget"&gt;&lt;/div&gt;
 
-&lt;script src="https://seggwat.com/static/widgets/v1/seggwat-star.js"
+&lt;script src="https://seggwat.com/static/widgets/v1/seggwat-rating.js"
   data-project-key="YOUR_PROJECT_KEY"
   data-question="Rate your experience"
   data-container="#star-widget"&gt;
@@ -263,46 +264,13 @@
 &lt;!-- Smiley variant (3-face) --&gt;
 &lt;div id="smiley-widget"&gt;&lt;/div&gt;
 
-&lt;script src="https://seggwat.com/static/widgets/v1/seggwat-star.js"
+&lt;script src="https://seggwat.com/static/widgets/v1/seggwat-rating.js"
   data-project-key="YOUR_PROJECT_KEY"
   data-question="How do you feel?"
   data-style="smiley"
-  data-max-rating="3"
+  data-faces="3"
   data-container="#smiley-widget"&gt;
 &lt;/script&gt;</code></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== CONTACT FORM ==================== -->
-        <div class="mb-16 animate-fade-up delay-600">
-            <h2 class="text-3xl font-bold text-base-content mb-2">Contact Form</h2>
-            <p class="text-base-content/70 mb-6">
-                A floating contact button that opens a form modal. Similar to the feedback button but focused on contact requests.
-            </p>
-
-            <div class="card glass-card rounded-2xl border border-base-content/5">
-                <div class="card-body">
-                    <h3 class="card-title text-lg mb-3">Embed Code</h3>
-                    <div class="code-snippet">
-                        <button onclick="copyCode('contact-code')" class="copy-btn btn btn-sm btn-ghost">Copy</button>
-                        <div class="mockup-code bg-neutral text-neutral-content">
-                            <pre class="px-6 overflow-x-auto"><code id="contact-code">&lt;script defer
-  src="https://seggwat.com/static/widgets/v1/seggwat-contact.js"
-  data-project-key="YOUR_PROJECT_KEY"
-  data-button-color="#2563eb"
-  data-button-position="bottom-right"&gt;
-&lt;/script&gt;</code></pre>
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <h4 class="font-semibold text-sm text-base-content/70 mb-2">Programmatic Control</h4>
-                        <div class="flex gap-2 flex-wrap">
-                            <button onclick="SeggwatContact?.open()" class="btn btn-sm btn-accent">Open Contact Form</button>
-                            <button onclick="SeggwatContact?.close()" class="btn btn-sm btn-outline">Close</button>
                         </div>
                     </div>
                 </div>
@@ -346,7 +314,7 @@
                             <tr>
                                 <td><code class="badge badge-neutral">data-language</code></td>
                                 <td>All</td>
-                                <td>UI language (en, de, sv)</td>
+                                <td>UI language (en, de, sv, fr)</td>
                                 <td>Auto-detect</td>
                             </tr>
                             <tr>
@@ -380,10 +348,16 @@
                                 <td>stars</td>
                             </tr>
                             <tr>
-                                <td><code class="badge badge-neutral">data-max-rating</code></td>
+                                <td><code class="badge badge-neutral">data-max-stars</code></td>
                                 <td>Star</td>
-                                <td>Max rating value (3, 5, or 10)</td>
+                                <td>Number of stars (1-10, star style only)</td>
                                 <td>5</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-faces</code></td>
+                                <td>Star</td>
+                                <td>Number of faces (smiley style only)</td>
+                                <td>3</td>
                             </tr>
                             <tr>
                                 <td><code class="badge badge-neutral">data-version</code></td>
@@ -425,14 +399,6 @@
         id="feedback-widget-script">
     </script>
 
-    <!-- Contact Form (floating, bottom-right) -->
-    <script defer
-        src="https://seggwat.com/static/widgets/v1/seggwat-contact.js"
-        data-project-key="demo-project-key"
-        data-button-color="#2563eb"
-        data-button-position="bottom-right">
-    </script>
-
     <!-- Helpful Widget (inline in container) -->
     <script
         src="https://seggwat.com/static/widgets/v1/seggwat-helpful.js"
@@ -444,7 +410,7 @@
 
     <!-- Star Rating (inline in container) -->
     <script
-        src="https://seggwat.com/static/widgets/v1/seggwat-star.js"
+        src="https://seggwat.com/static/widgets/v1/seggwat-rating.js"
         data-project-key="demo-project-key"
         data-question="Rate your experience"
         data-container="#star-widget-container">
@@ -452,11 +418,11 @@
 
     <!-- Smiley Rating (inline in container) -->
     <script
-        src="https://seggwat.com/static/widgets/v1/seggwat-star.js"
+        src="https://seggwat.com/static/widgets/v1/seggwat-rating.js"
         data-project-key="demo-project-key"
         data-question="How do you feel?"
         data-style="smiley"
-        data-max-rating="3"
+        data-faces="3"
         data-container="#smiley-widget-container">
     </script>
 
@@ -491,7 +457,11 @@
         }
 
         // Feedback widget controls
+        // Track current position so it survives a language re-inject (below).
+        let currentFeedbackPosition = 'right-side';
+
         function updateFeedbackPosition(position) {
+            currentFeedbackPosition = position;
             SeggwatFeedback?.updateAppearance({ position });
             // Update button states
             event.target.closest('.flex').querySelectorAll('.btn').forEach(btn => {
@@ -502,8 +472,31 @@
             event.target.classList.add('btn-primary');
         }
 
+        // Language is loaded once when the widget initializes (it fetches the
+        // i18n bundle and builds the modal then), so it can't be hot-swapped
+        // via updateAppearance. The supported pattern — mirroring SeggWat's own
+        // demo host — is to destroy the widget and re-inject the script with a
+        // fresh data-language. Current position is carried over.
         function updateFeedbackLanguage(language) {
-            SeggwatFeedback?.updateAppearance({ language });
+            const existing = document.getElementById('feedback-widget-script');
+            const projectKey = existing?.dataset.projectKey ?? 'demo-project-key';
+            const color = existing?.dataset.buttonColor ?? '#10b981';
+            const screenshots = existing?.dataset.enableScreenshots ?? 'true';
+
+            SeggwatFeedback?.destroy?.();
+            if (existing) existing.remove();
+
+            const script = document.createElement('script');
+            script.id = 'feedback-widget-script';
+            script.defer = true;
+            script.src = 'https://seggwat.com/static/widgets/v1/seggwat-feedback.js';
+            script.dataset.projectKey = projectKey;
+            script.dataset.buttonColor = color;
+            script.dataset.buttonPosition = currentFeedbackPosition;
+            script.dataset.language = language;
+            script.dataset.enableScreenshots = screenshots;
+            document.body.appendChild(script);
+
             event.target.closest('.flex').querySelectorAll('.btn').forEach(btn => {
                 btn.classList.remove('btn-primary');
                 btn.classList.add('btn-outline');

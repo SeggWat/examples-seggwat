@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 
 type Position = 'bottom-right' | 'right-side' | 'icon-only'
-type Language = 'en' | 'de' | 'sv'
+type Language = 'en' | 'de' | 'sv' | 'fr'
 
 const currentColor = ref('#42b883')
 const position = ref<Position>('bottom-right')
@@ -28,6 +28,7 @@ const languages: { value: Language; label: string }[] = [
   { value: 'en', label: 'English' },
   { value: 'de', label: 'Deutsch' },
   { value: 'sv', label: 'Svenska' },
+  { value: 'fr', label: 'Français' },
 ]
 
 function updateColor(color: string) {
@@ -40,9 +41,31 @@ function updatePosition(newPosition: Position) {
   window.SeggwatFeedback?.updateAppearance({ position: newPosition })
 }
 
+// Language is loaded once when the widget initializes (it fetches the i18n
+// bundle and builds the modal then), so it can't be hot-swapped via
+// updateAppearance. The supported pattern — mirroring SeggWat's own demo
+// host — is to destroy the widget and re-inject the script with a fresh
+// data-language. Current color/position are carried over so they persist.
 function updateLanguage(lang: Language) {
   language.value = lang
-  window.SeggwatFeedback?.updateAppearance({ language: lang })
+
+  const selector = 'script[src*="seggwat.com/static/widgets/"]'
+  const existing = document.querySelector<HTMLScriptElement>(selector)
+  const projectKey = existing?.dataset.projectKey ?? 'demo-project-key'
+  const screenshots = existing?.dataset.enableScreenshots ?? 'true'
+
+  window.SeggwatFeedback?.destroy?.()
+  document.querySelectorAll(selector).forEach((el) => el.remove())
+
+  const script = document.createElement('script')
+  script.src = 'https://seggwat.com/static/widgets/v1/seggwat-feedback.js'
+  script.defer = true
+  script.dataset.projectKey = projectKey
+  script.dataset.buttonColor = currentColor.value
+  script.dataset.buttonPosition = position.value
+  script.dataset.language = lang
+  script.dataset.enableScreenshots = screenshots
+  document.body.appendChild(script)
 }
 
 function handleUserIdChange(event: Event) {
@@ -232,12 +255,14 @@ onMounted(() => {
         </p>
 
         <div class="code-block">
-          <pre>{{ `// Change color, position, or language
+          <pre>{{ `// Change color or position at runtime
 window.SeggwatFeedback?.updateAppearance({
   color: '#ef4444',
-  position: 'icon-only',
-  language: 'de'
+  position: 'icon-only'
 })
+
+// Language is set at load via data-language; switching it
+// means destroy() + re-injecting the script tag.
 
 // Programmatic control
 window.SeggwatFeedback?.open()

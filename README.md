@@ -1,31 +1,26 @@
-# SeggWat Widget Examples
+# SeggWat Widget Examples — In-App Feedback Widget for React, Vue, Next.js, Astro & Plain HTML
 
-Example integrations of the [SeggWat](https://seggwat.com) feedback widget across popular frameworks. Each example demonstrates the same feature set:
+Production-ready example integrations of the [SeggWat](https://seggwat.com) **feedback widget** across popular frameworks. Add in-app bug reports, feature requests, and **annotated screenshots** to any web app with a single `<script>` tag — no npm package, no build step, no backend code.
 
-- Dynamic color, position, and language switching
-- Programmatic open/close control
-- Screenshot capture
-- User identification
+Each example demonstrates the same feature set:
+
+- **Bug reports & feature requests** collected in context, on the page where they happen
+- **Screenshot capture and annotation** for high-signal visual feedback
+- **User identification** so feedback isn't anonymous guesswork
+- **Version tracking** to tie regressions to a specific release
+- Dynamic color and position, runtime language switching, and programmatic open/close control
 
 ## Examples
 
-| Directory | Framework | Setup |
-|---|---|---|
-| [`static/`](static/) | Plain HTML | Open `index.html` in a browser |
-| [`react/`](react/) | React 18 + Vite | `bun install && bun run dev` |
-| [`nextjs/`](nextjs/) | Next.js 15 (App Router) | `bun install && bun run dev` |
-| [`vue/`](vue/) | Vue 3 + Vite | `bun install && bun run dev` |
-| [`astro/`](astro/) | Astro 5 | `bun install && bun run dev` |
+| Directory | Framework | Setup | Guide |
+|---|---|---|---|
+| [`static/`](static/) | Plain HTML / static site | Open `index.html` in a browser | [README](static/README.md) |
+| [`react/`](react/) | React 18 + Vite + TypeScript | `bun install && bun run dev` | [README](react/README.md) |
+| [`nextjs/`](nextjs/) | Next.js 15 (App Router) | `bun install && bun run dev` | [README](nextjs/README.md) |
+| [`vue/`](vue/) | Vue 3 + Vite (Composition API) | `bun install && bun run dev` | [README](vue/README.md) |
+| [`astro/`](astro/) | Astro 5 | `bun install && bun run dev` | [README](astro/README.md) |
 
-## Per-Framework READMEs
-
-- [`static/README.md`](static/README.md)
-- [`react/README.md`](react/README.md)
-- [`nextjs/README.md`](nextjs/README.md)
-- [`vue/README.md`](vue/README.md)
-- [`astro/README.md`](astro/README.md)
-
-## Quick Start
+## Quick start
 
 Pick any example, install dependencies, and run the dev server:
 
@@ -35,11 +30,11 @@ bun install
 bun run dev
 ```
 
-All examples use `demo-project-key` as a placeholder. Replace it with your project key from the [SeggWat dashboard](https://seggwat.com) for production use.
+All examples use `demo-project-key` as a placeholder. Replace it with your real project key from the [SeggWat dashboard](https://seggwat.com) before going to production.
 
-## Widget Script
+## One script tag, every framework
 
-Every framework loads the same script tag — only the integration pattern differs:
+Every framework loads the same widget script — only the integration pattern differs:
 
 ```html
 <script defer
@@ -55,11 +50,10 @@ Every framework loads the same script tag — only the integration pattern diffe
 All examples use the same runtime API:
 
 ```javascript
-// Customize appearance
+// Live appearance: color / position / button text (not language)
 window.SeggwatFeedback?.updateAppearance({
   color: '#ef4444',
-  position: 'icon-only',
-  language: 'de'
+  position: 'icon-only'
 })
 
 // Programmatic control
@@ -67,11 +61,18 @@ window.SeggwatFeedback?.open()
 window.SeggwatFeedback?.close()
 window.SeggwatFeedback?.captureScreenshot()
 
-// User identification
-window.SeggwatFeedback?.setUser('user-123')
+// User identification (optional email pre-fills the form)
+window.SeggwatFeedback?.setUser('user-123', 'user@example.com')
 ```
+
+> **Switching language at runtime?** The UI language is loaded once at init from `data-language`, so it can't be changed through `updateAppearance`. To switch it live, call `window.SeggwatFeedback.destroy()` and re-inject the script with a new `data-language` — each example demonstrates this pattern.
 
 ## Documentation
 
-- [Widget Installation](https://seggwat.com/docs/widget/installation)
-- [Widget API Reference](https://seggwat.com/docs/widget/api)
+- [Widget installation guide](https://seggwat.com/docs/widget/installation)
+- [Widget API reference](https://seggwat.com/docs/widget/api)
+- [SeggWat documentation](https://seggwat.com/docs)
+
+## About SeggWat
+
+[SeggWat](https://seggwat.com) is a lightweight feedback collection platform for product teams. Embed a feedback button, helpful/thumbs rating, star or NPS-style surveys on any site, then triage bug reports and feature requests from the dashboard, API, MCP server, or iOS app. [Start collecting feedback →](https://seggwat.com)

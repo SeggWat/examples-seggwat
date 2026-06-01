@@ -64,6 +64,7 @@ import Layout from '../layouts/Layout.astro'
               <button data-language="en" class="active" style="background-color: #4b5563">English</button>
               <button data-language="de" style="background-color: #4b5563">Deutsch</button>
               <button data-language="sv" style="background-color: #4b5563">Svenska</button>
+              <button data-language="fr" style="background-color: #4b5563">Français</button>
             </div>
           </div>
         </div>
@@ -117,12 +118,14 @@ import Layout from '../layouts/Layout.astro'
         </p>
 
         <div class="code-block">
-          <pre>{`// Change color, position, or language
+          <pre>{`// Change color or position at runtime
 window.SeggwatFeedback?.updateAppearance({
   color: '#ef4444',
-  position: 'icon-only',
-  language: 'de'
+  position: 'icon-only'
 })
+
+// Language is set at load via data-language; switching it
+// means destroy() + re-injecting the script tag.
 
 // Programmatic control
 window.SeggwatFeedback?.open()
@@ -187,12 +190,17 @@ window.SeggwatFeedback?.setUser('user-123')`}</pre>
     activeBtn.classList.add('active')
   }
 
+  // Current visual state, carried over when language re-injects the widget.
+  let currentColor = '#ff5d01'
+  let currentPosition: 'bottom-right' | 'right-side' | 'icon-only' = 'bottom-right'
+
   // Color buttons
   document.getElementById('color-buttons')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('button')
     if (!btn) return
     const color = btn.dataset.color
     if (color) {
+      currentColor = color
       window.SeggwatFeedback?.updateAppearance({ color })
       setActiveButton(btn.parentElement!, btn)
     }
@@ -204,18 +212,40 @@ window.SeggwatFeedback?.setUser('user-123')`}</pre>
     if (!btn) return
     const position = btn.dataset.position as 'bottom-right' | 'right-side' | 'icon-only'
     if (position) {
+      currentPosition = position
       window.SeggwatFeedback?.updateAppearance({ position })
       setActiveButton(btn.parentElement!, btn)
     }
   })
 
-  // Language buttons
+  // Language buttons. Language is loaded once when the widget initializes
+  // (it fetches the i18n bundle and builds the modal then), so it can't be
+  // hot-swapped via updateAppearance. The supported pattern — mirroring
+  // SeggWat's own demo host — is to destroy the widget and re-inject the
+  // script with a fresh data-language; current color/position are carried over.
   document.getElementById('language-buttons')?.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('button')
     if (!btn) return
-    const language = btn.dataset.language as 'en' | 'de' | 'sv'
+    const language = btn.dataset.language as 'en' | 'de' | 'sv' | 'fr'
     if (language) {
-      window.SeggwatFeedback?.updateAppearance({ language })
+      const selector = 'script[src*="seggwat.com/static/widgets/"]'
+      const existing = document.querySelector<HTMLScriptElement>(selector)
+      const projectKey = existing?.dataset.projectKey ?? 'demo-project-key'
+      const screenshots = existing?.dataset.enableScreenshots ?? 'true'
+
+      window.SeggwatFeedback?.destroy?.()
+      document.querySelectorAll(selector).forEach((el) => el.remove())
+
+      const script = document.createElement('script')
+      script.src = 'https://seggwat.com/static/widgets/v1/seggwat-feedback.js'
+      script.defer = true
+      script.dataset.projectKey = projectKey
+      script.dataset.buttonColor = currentColor
+      script.dataset.buttonPosition = currentPosition
+      script.dataset.language = language
+      script.dataset.enableScreenshots = screenshots
+      document.body.appendChild(script)
+
       setActiveButton(btn.parentElement!, btn)
     }
   })

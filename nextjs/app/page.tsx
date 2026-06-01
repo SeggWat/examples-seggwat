@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import styles from './page.module.css'
 
 type Position = 'bottom-right' | 'right-side' | 'icon-only'
-type Language = 'en' | 'de' | 'sv'
+type Language = 'en' | 'de' | 'sv' | 'fr'
 
 function isWidgetMisconfigured() {
   if (typeof document === 'undefined') return false
@@ -42,9 +42,31 @@ export default function Home() {
     window.SeggwatFeedback?.updateAppearance({ position: newPosition })
   }
 
+  // Language is loaded once when the widget initializes (it fetches the i18n
+  // bundle and builds the modal then), so it can't be hot-swapped via
+  // updateAppearance. The supported pattern — mirroring SeggWat's own demo
+  // host — is to destroy the widget and re-inject the script with a fresh
+  // data-language. Current color/position are carried over so they persist.
   const updateLanguage = (lang: Language) => {
     setLanguage(lang)
-    window.SeggwatFeedback?.updateAppearance({ language: lang })
+
+    const selector = 'script[src*="seggwat.com/static/widgets/"]'
+    const existing = document.querySelector<HTMLScriptElement>(selector)
+    const projectKey = existing?.dataset.projectKey ?? 'demo-project-key'
+    const screenshots = existing?.dataset.enableScreenshots ?? 'true'
+
+    window.SeggwatFeedback?.destroy?.()
+    document.querySelectorAll(selector).forEach((el) => el.remove())
+
+    const script = document.createElement('script')
+    script.src = 'https://seggwat.com/static/widgets/v1/seggwat-feedback.js'
+    script.defer = true
+    script.dataset.projectKey = projectKey
+    script.dataset.buttonColor = currentColor
+    script.dataset.buttonPosition = position
+    script.dataset.language = lang
+    script.dataset.enableScreenshots = screenshots
+    document.body.appendChild(script)
   }
 
   const handleUserIdChange = (value: string) => {
@@ -143,6 +165,7 @@ export default function Home() {
                   { value: 'en' as Language, label: 'English' },
                   { value: 'de' as Language, label: 'Deutsch' },
                   { value: 'sv' as Language, label: 'Svenska' },
+                  { value: 'fr' as Language, label: 'Français' },
                 ].map(({ value, label }) => (
                   <button
                     key={value}
@@ -227,12 +250,14 @@ export default function Home() {
           </p>
 
           <div className={styles.codeBlock}>
-            <pre>{`// Change color, position, or language
+            <pre>{`// Change color or position at runtime
 window.SeggwatFeedback?.updateAppearance({
   color: '#ef4444',
-  position: 'icon-only',
-  language: 'de'
+  position: 'icon-only'
 })
+
+// Language is set at load via data-language; switching it
+// means destroy() + re-injecting the script tag.
 
 // Programmatic control
 window.SeggwatFeedback?.open()

@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en" data-theme="sunset">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SeggWat Survey Widget - Static Site Example</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .glass-card {
+            background: rgba(30, 35, 50, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+        [data-theme="nord"] .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .text-gradient-brand {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        [data-theme="nord"] .text-gradient-brand {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-grid-pattern {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        [data-theme="nord"] .hero-grid-pattern {
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        }
+
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up { animation: fade-up 0.6s ease-out forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-600 { animation-delay: 600ms; }
+
+        .section-badge {
+            display: inline-block;
+            padding: 0.375rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 9999px;
+        }
+        [data-theme="nord"] .section-badge {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.12);
+        }
+
+        [data-theme="nord"] .navbar {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        [data-theme="nord"] .navbar * { color: #111827 !important; }
+        [data-theme="nord"] .navbar svg { fill: #111827 !important; }
+        [data-theme="sunset"] .navbar { background-color: #1f2937 !important; }
+
+        .code-snippet { position: relative; }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+        }
+
+        /* Inline mount target for the inline survey demo */
+        #inline-survey-container {
+            min-height: 220px;
+        }
+    </style>
+</head>
+
+<body class="bg-base-100 min-h-screen pb-12">
+    <div class="fixed inset-0 hero-grid-pattern pointer-events-none opacity-50"></div>
+
+    <!-- Navbar -->
+    <div class="navbar bg-gray-800/90 backdrop-blur-md shadow-lg sticky top-0 z-50 px-4 lg:px-12">
+        <div class="flex-1 flex items-center gap-3">
+            <a href="./index.html" class="btn btn-ghost btn-sm">&larr; All widgets</a>
+            <span class="text-xl font-bold">SeggWat Survey Example</span>
+        </div>
+        <div class="flex-none gap-4 flex items-center">
+            <label class="swap swap-rotate">
+                <input type="checkbox" id="theme-toggle" />
+                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+                </svg>
+                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+                </svg>
+            </label>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl relative">
+        <div id="config-warning" class="alert alert-warning mb-8 hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+            </svg>
+            <span>
+                <strong>Configuration warning:</strong> the survey widget script is missing a real
+                <code>data-project-key</code>. Replace <code>demo-project-key</code> with your key from
+                <a href="https://seggwat.com" class="link link-hover font-semibold">the SeggWat dashboard</a>.
+                The widget will fall back to an empty survey list until then.
+            </span>
+        </div>
+
+        <!-- Hero -->
+        <div class="text-center mb-16">
+            <div class="animate-fade-up">
+                <span class="section-badge mb-4">Survey Widget</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight text-base-content mb-4 animate-fade-up delay-100">
+                Multi-question <span class="text-gradient-brand">Surveys</span>
+            </h1>
+            <p class="text-lg text-base-content/70 max-w-2xl mx-auto animate-fade-up delay-200">
+                Render targeted surveys as a slide-in banner, centered modal, or inline element. Triggers,
+                copy, and questions are configured server-side &mdash; the widget just renders them.
+            </p>
+        </div>
+
+        <!-- ==================== BANNER MODE ==================== -->
+        <div class="mb-16 animate-fade-up delay-300">
+            <h2 class="text-3xl font-bold text-base-content mb-2">Banner mode (default)</h2>
+            <p class="text-base-content/70 mb-6">
+                A fixed slide-in at the bottom of the viewport. Best for unobtrusive
+                in-product research. Fires automatically when a server-side trigger
+                (URL pattern, custom event, time-on-page) matches.
+            </p>
+
+            <div class="card glass-card rounded-2xl border border-base-content/5">
+                <div class="card-body">
+                    <h3 class="card-title text-lg mb-3">Embed Code</h3>
+                    <div class="code-snippet">
+                        <button onclick="copyCode('banner-code')" class="copy-btn btn btn-sm btn-ghost">Copy</button>
+                        <div class="mockup-code bg-neutral text-neutral-content">
+                            <pre class="px-6 overflow-x-auto"><code id="banner-code">&lt;script defer
+  src="https://seggwat.com/static/widgets/v1/seggwat-survey.js"
+  data-project-key="YOUR_PROJECT_KEY"
+  data-button-color="#6366f1"
+  data-mode="banner"&gt;
+&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="font-semibold text-sm text-base-content/70 mb-2">Programmatic control</h4>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="fireCustomTrigger()" class="btn btn-sm btn-accent">Fire custom event</button>
+                            <button onclick="showFirstSurvey()" class="btn btn-sm btn-primary">Show first live survey</button>
+                            <button onclick="SeggwatSurvey?.hide()" class="btn btn-sm btn-outline">Hide</button>
+                            <button onclick="SeggwatSurvey?.reset()" class="btn btn-sm btn-outline btn-warning">Reset cooldowns</button>
+                        </div>
+                        <p class="text-xs text-base-content/50 mt-2">
+                            <em>"Fire custom event"</em> dispatches
+                            <code>seggwat:survey:demo</code> &mdash; configure a survey
+                            in the dashboard with an event trigger named <code>demo</code> to react.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL MODE ==================== -->
+        <div class="mb-16 animate-fade-up delay-400">
+            <h2 class="text-3xl font-bold text-base-content mb-2">Modal mode</h2>
+            <p class="text-base-content/70 mb-6">
+                A centered overlay with a backdrop. Use for high-priority research moments
+                like cancellation flows or post-onboarding interviews.
+            </p>
+
+            <div class="card glass-card rounded-2xl border border-base-content/5">
+                <div class="card-body">
+                    <h3 class="card-title text-lg mb-3">Embed Code</h3>
+                    <div class="code-snippet">
+                        <button onclick="copyCode('modal-code')" class="copy-btn btn btn-sm btn-ghost">Copy</button>
+                        <div class="mockup-code bg-neutral text-neutral-content">
+                            <pre class="px-6 overflow-x-auto"><code id="modal-code">&lt;script defer
+  src="https://seggwat.com/static/widgets/v1/seggwat-survey.js"
+  data-project-key="YOUR_PROJECT_KEY"
+  data-mode="modal"
+  data-survey-id="YOUR_SURVEY_ID"&gt;
+&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-base-content/60 mt-4">
+                        Setting <code>data-survey-id</code> forces a specific survey and bypasses
+                        trigger evaluation. Cooldowns still apply unless you call
+                        <code>SeggwatSurvey.show(id, { force: true })</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== INLINE MODE ==================== -->
+        <div class="mb-16 animate-fade-up delay-500">
+            <h2 class="text-3xl font-bold text-base-content mb-2">Inline mode</h2>
+            <p class="text-base-content/70 mb-6">
+                Mounts directly into a container you supply. No backdrop, no dismiss button &mdash;
+                perfect for in-page research on docs, knowledge base, or empty-state screens.
+            </p>
+
+            <div class="card glass-card rounded-2xl border border-base-content/5">
+                <div class="card-body">
+                    <h3 class="card-title text-lg mb-3">Live Demo</h3>
+                    <div id="inline-survey-container" class="p-4 rounded-xl bg-base-200/50 mb-4 grid place-items-center text-base-content/50 text-sm">
+                        Inline survey will mount here once it's published to your project.
+                    </div>
+
+                    <h3 class="card-title text-lg mb-3">Embed Code</h3>
+                    <div class="code-snippet">
+                        <button onclick="copyCode('inline-code')" class="copy-btn btn btn-sm btn-ghost">Copy</button>
+                        <div class="mockup-code bg-neutral text-neutral-content">
+                            <pre class="px-6 overflow-x-auto"><code id="inline-code">&lt;div id="inline-survey-container"&gt;&lt;/div&gt;
+
+&lt;script defer
+  src="https://seggwat.com/static/widgets/v1/seggwat-survey.js"
+  data-project-key="YOUR_PROJECT_KEY"
+  data-mode="inline"
+  data-container="#inline-survey-container"
+  data-survey-id="YOUR_SURVEY_ID"&gt;
+&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== LIFECYCLE INVITATIONS ==================== -->
+        <div class="mb-16 animate-fade-up delay-600">
+            <h2 class="text-3xl font-bold text-base-content mb-2">Lifecycle invitations</h2>
+            <p class="text-base-content/70 mb-6">
+                Your backend dispatches lifecycle events (<code>trial_expired</code>,
+                <code>subscription_cancelled</code>, custom) via the API, then injects the
+                returned magic-link tokens here. The widget renders the matching survey in-app
+                and suppresses the email follow-up.
+            </p>
+
+            <div class="card glass-card rounded-2xl border border-base-content/5">
+                <div class="card-body">
+                    <h3 class="card-title text-lg mb-3">Inject tokens from your backend</h3>
+                    <div class="code-snippet">
+                        <button onclick="copyCode('tokens-code')" class="copy-btn btn btn-sm btn-ghost">Copy</button>
+                        <div class="mockup-code bg-neutral text-neutral-content">
+                            <pre class="px-6 overflow-x-auto"><code id="tokens-code">&lt;!-- Option A: server renders tokens into the script tag --&gt;
+&lt;script defer
+  src="https://seggwat.com/static/widgets/v1/seggwat-survey.js"
+  data-project-key="YOUR_PROJECT_KEY"
+  data-pending-tokens="tok_abc123 tok_def456"&gt;
+&lt;/script&gt;
+
+&lt;!-- Option B: client-side after a route change --&gt;
+&lt;script&gt;
+  const res = await fetch(
+    `/api/v1/projects/${PROJECT_ID}/pending-invitations?user_ref=${userRef}`,
+    { headers: { 'X-API-Key': ORG_TOKEN } }
+  );
+  const { tokens } = await res.json();
+  SeggwatSurvey?.setPendingInvitations(tokens);
+&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CONFIGURATION REFERENCE ==================== -->
+        <div class="mb-16 animate-fade-up">
+            <h2 class="text-3xl font-bold text-base-content mb-6">Configuration reference</h2>
+
+            <div class="card glass-card rounded-2xl border border-base-content/5">
+                <div class="card-body overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Attribute</th>
+                                <th>Description</th>
+                                <th>Default</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-project-key</code></td>
+                                <td>Project UUID (required)</td>
+                                <td>&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-mode</code></td>
+                                <td>Display mode: <code>banner</code>, <code>modal</code>, or <code>inline</code></td>
+                                <td>banner</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-container</code></td>
+                                <td>CSS selector for inline mount point (inline mode)</td>
+                                <td>&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-survey-id</code></td>
+                                <td>Force a specific survey, bypassing trigger evaluation</td>
+                                <td>&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-cooldown-days</code></td>
+                                <td>Override the per-survey cooldown locally (dev/QA)</td>
+                                <td>Server value</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-pending-tokens</code></td>
+                                <td>Whitespace- or comma-separated magic-link tokens for lifecycle invitations</td>
+                                <td>&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-button-color</code></td>
+                                <td>Hex color for the primary action button</td>
+                                <td>#2563eb</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-language</code></td>
+                                <td>UI language (en, de, sv, fr)</td>
+                                <td>Auto-detect</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-version</code></td>
+                                <td>App version stamped on submissions</td>
+                                <td>&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td><code class="badge badge-neutral">data-show-powered-by</code></td>
+                                <td>Show "Powered by SeggWat" footer</td>
+                                <td>true</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PUBLIC API ==================== -->
+        <div class="mb-16 animate-fade-up">
+            <h2 class="text-3xl font-bold text-base-content mb-6">Public API</h2>
+
+            <div class="card glass-card rounded-2xl border border-base-content/5">
+                <div class="card-body">
+                    <div class="code-snippet">
+                        <button onclick="copyCode('api-code')" class="copy-btn btn btn-sm btn-ghost">Copy</button>
+                        <div class="mockup-code bg-neutral text-neutral-content">
+                            <pre class="px-6 overflow-x-auto"><code id="api-code">// Identify the respondent (max 255 chars, alphanumeric + - _)
+SeggwatSurvey.setUser('user_123');
+
+// Fire a custom event → triggers any survey listening for 'checkout_completed'
+SeggwatSurvey.trigger('checkout_completed');
+
+// Show a specific survey now (respects cooldown unless forced)
+SeggwatSurvey.show('srv_abc123');
+SeggwatSurvey.show('srv_abc123', { force: true });
+
+// Hide the active survey without submitting
+SeggwatSurvey.hide();
+
+// Inject lifecycle invitation tokens fetched from your backend
+await SeggwatSurvey.setPendingInvitations(['tok_abc', 'tok_def']);
+
+// Check whether the current user has answered within cooldown
+if (!SeggwatSurvey.hasAnswered('srv_abc123')) { /* prompt them */ }
+
+// Clear all local cooldown / sample-roll state (dev/QA)
+SeggwatSurvey.reset();
+
+// Read-only snapshot of live surveys returned by the server
+console.log(SeggwatSurvey.surveys);</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-base-content/50 text-sm">
+            <p>
+                <a href="https://seggwat.com/docs/widget/installation" class="link link-hover">Documentation</a>
+                &middot;
+                <a href="https://seggwat.com" class="link link-hover">Dashboard</a>
+                &middot;
+                <a href="./index.html" class="link link-hover">Other widgets</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== SURVEY WIDGET SCRIPTS ==================== -->
+
+    <!-- Banner mode (auto-triggered by server-side rules) -->
+    <script defer
+        src="https://seggwat.com/static/widgets/v1/seggwat-survey.js"
+        data-project-key="demo-project-key"
+        data-button-color="#6366f1"
+        data-mode="banner"
+        id="survey-widget-script">
+    </script>
+
+    <script>
+        function isWidgetMisconfigured() {
+            const script = document.getElementById('survey-widget-script');
+            if (!script) return false;
+            const key = (script.dataset.projectKey || '').trim();
+            return !key || key === 'demo-project-key' || key === 'YOUR_PROJECT_KEY';
+        }
+
+        if (isWidgetMisconfigured()) {
+            document.getElementById('config-warning')?.classList.remove('hidden');
+        }
+
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target.closest('button');
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.classList.remove('btn-success');
+                }, 2000);
+            });
+        }
+
+        function fireCustomTrigger() {
+            // Dispatches `seggwat:survey:demo`. Configure a survey in the
+            // dashboard with an event trigger named `demo` to react.
+            window.SeggwatSurvey?.trigger('demo');
+        }
+
+        function showFirstSurvey() {
+            const all = window.SeggwatSurvey?.surveys || [];
+            if (all.length === 0) {
+                alert('No live surveys returned for this project key. Publish one in the dashboard, then reload.');
+                return;
+            }
+            window.SeggwatSurvey.show(all[0].id, { force: true });
+        }
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'sunset';
+        const isLight = savedTheme === 'nord';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.checked = isLight;
+        html.style.colorScheme = isLight ? 'light' : 'dark';
+        html.setAttribute('data-color-mode', isLight ? 'light' : 'dark');
+
+        themeToggle.addEventListener('change', (e) => {
+            const newTheme = e.target.checked ? 'nord' : 'sunset';
+            const colorMode = e.target.checked ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            html.setAttribute('data-color-mode', colorMode);
+            html.style.colorScheme = colorMode;
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>

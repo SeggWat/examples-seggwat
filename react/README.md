@@ -1,17 +1,16 @@
-# SeggWat React Example
+# React Feedback Widget Example — SeggWat
 
-Demonstrates how to integrate SeggWat feedback widgets into a React + Vite + TypeScript application.
+Add an in-app **feedback widget to your React app** with a single script tag — collect bug reports, feature requests, and **annotated screenshots** without an npm package or any backend code. This example uses React 18 + Vite + TypeScript and the [SeggWat](https://seggwat.com) feedback widget.
 
-## Features
+## What this example shows
 
-- Script tag integration (no npm package)
-- Full TypeScript declarations for all widget APIs
-- Dynamic customization (color, position, language)
-- Programmatic open/close control
-- Screenshot capture and annotation
-- User identification
+- **Script-tag integration** — no npm dependency, works with any React setup
+- **Full TypeScript declarations** for every widget API (`src/seggwat.d.ts`)
+- **Screenshot capture and annotation** for visual bug reports
+- **User identification** to attach feedback to a known user
+- Dynamic color and position, runtime language switching, and programmatic open/close control
 
-## Quick Start
+## Quick start
 
 ### 1. Install dependencies
 
@@ -19,7 +18,7 @@ Demonstrates how to integrate SeggWat feedback widgets into a React + Vite + Typ
 bun install
 ```
 
-### 2. Update the project key
+### 2. Add your project key
 
 Edit `index.html` and replace `demo-project-key` with your SeggWat project key:
 
@@ -32,7 +31,7 @@ Edit `index.html` and replace `demo-project-key` with your SeggWat project key:
 </script>
 ```
 
-### 3. Run the development server
+### 3. Run the dev server
 
 ```bash
 bun run dev
@@ -46,39 +45,37 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 bun run build
 ```
 
-## How It Works
+## How it works
 
-The widget loads via a `<script>` tag in `index.html`, so it persists across React route changes without re-mounting.
+The widget loads via a `<script>` tag in `index.html`, so it persists across React route changes without re-mounting. No React component wraps it — it lives outside the React tree and talks to your app through the global `window.SeggwatFeedback` API.
 
-### Modular Widget URLs
+### Widget script URLs
 
 | Widget | Script URL |
 |--------|-----------|
-| Feedback Button | `https://seggwat.com/static/widgets/v1/seggwat-feedback.js` |
-| Helpful Rating | `https://seggwat.com/static/widgets/v1/seggwat-helpful.js` |
-| Star Rating | `https://seggwat.com/static/widgets/v1/seggwat-star.js` |
-| Contact Form | `https://seggwat.com/static/widgets/v1/seggwat-contact.js` |
+| Feedback button | `https://seggwat.com/static/widgets/v1/seggwat-feedback.js` |
+| Helpful rating (thumbs up/down) | `https://seggwat.com/static/widgets/v1/seggwat-helpful.js` |
+| Star / smiley rating | `https://seggwat.com/static/widgets/v1/seggwat-rating.js` |
 
-### Configuration Attributes
+### Configuration attributes
 
 | Attribute | Description | Values |
 |-----------|-------------|--------|
-| `data-project-key` | Project key (required) | UUID from dashboard |
-| `data-button-color` | Button color | Hex color, e.g. `#61dafb` |
+| `data-project-key` | Project key (required) | UUID from the dashboard |
+| `data-button-color` | Button / modal accent color | Hex color, e.g. `#61dafb` |
 | `data-button-position` | Button layout | `bottom-right`, `right-side`, `icon-only` |
-| `data-language` | UI language | `en`, `de`, `sv` (auto-detect by default) |
-| `data-enable-screenshots` | Screenshot support | `true` / `false` |
+| `data-language` | UI language | `en`, `de`, `sv`, `fr` (auto-detect by default) |
+| `data-enable-screenshots` | Screenshot support (desktop only) | `true` / `false` |
 | `data-version` | App version tag | e.g. `1.2.3` |
 | `data-show-powered-by` | Branding label | `true` / `false` |
 
 ### JavaScript API
 
 ```typescript
-// Update appearance dynamically
+// Live appearance: color / position / button text (not language)
 window.SeggwatFeedback?.updateAppearance({
   color: '#ef4444',
-  position: 'icon-only',
-  language: 'de'
+  position: 'icon-only'
 })
 
 // Programmatic control
@@ -89,26 +86,35 @@ window.SeggwatFeedback?.close()
 window.SeggwatFeedback?.captureScreenshot()
 window.SeggwatFeedback?.screenshotsEnabled // read-only boolean
 
-// User identification
-window.SeggwatFeedback?.setUser('user-123')
+// User identification (optional email pre-fills the form)
+window.SeggwatFeedback?.setUser('user-123', 'user@example.com')
 ```
 
-### TypeScript Support
+### Switching language at runtime
 
-Type declarations for all widget globals are in `src/seggwat.d.ts`:
+The UI language is loaded once when the widget initializes (from `data-language`), so it can't be changed through `updateAppearance`. To switch it live, call `window.SeggwatFeedback.destroy()` and re-inject the script with a new `data-language`. See `src/App.tsx` (`updateLanguage`) for the working pattern.
 
-- `window.SeggwatFeedback` — Feedback button API
-- `window.SeggwatHelpful` — Helpful rating API
-- `window.SeggwatStar` — Star rating API
-- `window.SeggwatContact` — Contact form API
+### TypeScript support
 
-## Available Scripts
+Type declarations for all widget globals live in `src/seggwat.d.ts`:
 
-- `bun run dev` — Start development server
-- `bun run build` — Build for production
-- `bun run preview` — Preview production build
+- `window.SeggwatFeedback` — feedback button API
+- `window.SeggwatHelpful` — helpful rating API
+- `window.SeggwatRating` — star / smiley rating API
 
-## Learn More
+## Available scripts
 
-- [Widget Installation](https://seggwat.com/docs/widget/installation)
-- [Full Documentation](https://seggwat.com/docs)
+- `bun run dev` — start the development server
+- `bun run build` — build for production
+- `bun run preview` — preview the production build
+
+## Other framework examples
+
+[Plain HTML](../static/) · [Next.js](../nextjs/) · [Vue](../vue/) · [Astro](../astro/)
+
+## Learn more
+
+- [Widget installation guide](https://seggwat.com/docs/widget/installation)
+- [SeggWat documentation](https://seggwat.com/docs)
+
+[SeggWat](https://seggwat.com) is a lightweight feedback platform for product teams — collect and triage bug reports, feature requests, and ratings from any web or mobile app.
